@@ -38,7 +38,7 @@ function Horse(id, x, y){
 					//Change HTML class of horse to runDown
 					horse.element.className = 'horse runDown';
 					//Change the speed, will be random value from 10 to 20
-					horse.speed = Math.random()*10 + 10;
+					horse.speed = Math.random() * 10 + 10;
 					horse.moveDown();
 				}
 			}
@@ -101,7 +101,7 @@ function Horse(id, x, y){
 	this.arrive = function(){
 		//Stop the horse run by change class to standRight
 		this.element.className = 'horse standRight';
-		this.lap = 0;//Reset the lap
+		this.lap = 0; //Reset the lap
 
 		/*Show the result*/
 		var tds = document.querySelectorAll('#results .result');//Get all table cell to display the result
@@ -112,17 +112,39 @@ function Horse(id, x, y){
 		results.push(this.number);
 
 		//Win horse
-		if (results.length == 1){
+		if (results.length == 1) {
 			//If win horse is the bet horse, then add the fund
+			var resultsMessage = document.getElementById('resultMessage')
 			if (this.number == bethorse){
 				funds += amount;
+				resultsMessage.innerText = 'YOU WIN!';
+				resultsMessage.style.color = "#00ccff";
 			}else{
 				funds -= amount;
+				resultsMessage.innerText = 'YOU LOSE!';
+				resultsMessage.style.color = "#ff0000";
 			}
+
 			document.getElementById('funds').innerText = funds;
-		}else if (results.length == 4){
+		} else if (results.length == 4) {
 			//All horse arrived, enable again the Start Button
-			document.getElementById('start').disabled = false;
+			var startButton = document.getElementById('start');
+			start.disabled = false;
+			startButton.style.display = 'block';
+
+			var resultsTable = document.getElementById('results');
+			resultsTable.style.display = 'table';
+
+			var betDisplay = document.getElementById('bet');
+			betDisplay.style.display = 'block';
+
+			var resultsMessage = document.getElementById('resultMessage');
+			resultsMessage.style.display = 'block';
+
+			setTimeout(function() {
+				resultsMessage.innerText = '';
+				resultsMessage.style.display = 'none';
+			}, 2000);
 		}
 	}
 }
@@ -143,26 +165,61 @@ document.addEventListener("DOMContentLoaded", function(event) {
 		num_lap = parseInt(document.getElementById('num_lap').value);
 		bethorse = parseInt(document.getElementById('bethorse').value);
 
-		if (funds < amount){
+		if (funds < amount) {
 			alert('Not enough funds.');
 		}
-		else if (num_lap <= 0){
+		else if (amount <= 0) {
+			alert('Please insert bet amount');
+		}
+		else if (num_lap <= 0) {
 			alert('Number of lap must be greater than 1.');
-		}else{
+		} else {
 
 			/*Started the game*/
-			this.disabled = true;/*Disable the start button*/
-			var tds = document.querySelectorAll('#results .result');//Get all cells of result table.
+			this.disabled = true;
+
+			// Hide elements
+			var startButton = document.getElementById('start');
+			startButton.style.display = 'none';
+
+			var resultsTable = document.getElementById('results');
+			resultsTable.style.display = 'none';
+
+			var betDisplay = document.getElementById('bet');
+			betDisplay.style.display = 'none';
+
+			document.getElementById('resultMessage').style.display = 'none';
+
+			var tds = document.querySelectorAll('#results .result'); //Get all cells of result table.
 			for (var i = 0; i < tds.length; i++) {
-				tds[i].className = 'result';//Reset the result.
+				tds[i].className = 'result'; //Reset the result.
 			}
 
 			document.getElementById('funds').innerText = funds;
-			results = [];//Results array is to save the horse numbers when the race is finished.
-			horse1.run();
-			horse2.run();
-			horse3.run();
-			horse4.run();
+			results = []; //Results array is to save the horse numbers when the race is finished.
+
+			var countdownElement = document.getElementById('countdown');
+        	var countdown = 3;
+
+        	var countdownInterval = setInterval(function() {
+				if (countdown > 0) {
+					countdownElement.innerText = countdown;
+					countdown--;
+				} else {
+					clearInterval(countdownInterval);
+					countdownElement.innerText = 'GO!';
+					countdownElement.classList.add('go');
+					horse1.run();
+					horse2.run();
+					horse3.run();
+					horse4.run();
+
+					setTimeout(function() {
+						countdownElement.innerText = '';
+						countdownElement.classList.remove('go');
+					}, 1000);
+				}
+			}, 1000);
 		}
 	}
 });
